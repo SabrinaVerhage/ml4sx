@@ -19,7 +19,7 @@ Two interactive guides to get started:
 
 These start with general examples. The idea is to get a feel for the basics, then use that understanding to play around with sex-tech projects.
 
-You can click through the steps, move sliders, and see what changes. They're simplified demos, not actual AI models running in your browser. There are notes and links inside each guide if you want to dig further.
+Each guide has about ten short steps. Pick a step from the bar at the top, or use the Back / Next buttons (or the ← → keys). Every step has a short explanation, a picture, and a "Try it" panel where you can click buttons, move sliders, and see what changes. They're simplified demos, not actual AI models running in your browser. There are notes and links inside each guide if you want to dig further.
 
 ## Try them
 
@@ -29,7 +29,7 @@ You can click through the steps, move sliders, and see what changes. They're sim
 
 No setup or API key needed. On GitHub you'll see the code, so download the files to use the guides.
 
-The demos run locally and don't send prompts to an AI service. The language-model guide loads Google Fonts when you're online, but works without them too.
+The demos run locally and don't send prompts to an AI service. The guides load Google Fonts when you're online, but work without them too.
 
 ## More to come, probably :)
 
