@@ -1,69 +1,9 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f4f0"><meta name="description" content="A hands-on, step-by-step guide to text-to-image models, training, diffusion and attention. An interactive explanation for Prompt Denied."><title>Inside the emerging image — Prompt Denied</title><style>@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@500;600;700&display=swap');
-/* ── Shared guide design (keep in sync across both guides) ── */
-:root{--paper:#f6f4f0;--card:#fbfaf7;--ink:#28282c;--body:#4b4849;--muted:#6b6866;--line:#dcd8d2;--line-strong:#c4bdb7;--pink:#d53d78;--pink-ink:#b0285e;--pale:#f6dde6;--sans:'DM Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;--display:'Space Grotesk','DM Sans',system-ui,Arial,sans-serif;--mono:'DM Mono',ui-monospace,Consolas,'Courier New',monospace;--gutter:clamp(16px,3vw,40px);color-scheme:light}
-*{box-sizing:border-box}html{background:var(--paper)}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
-button,select,input{font:inherit;color:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{cursor:default;opacity:.35}a{color:inherit}
-:focus-visible{outline:3px solid var(--pink);outline-offset:3px}
-.label{display:block;font:500 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.top{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:1600px;margin:0 auto;padding:14px var(--gutter);border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none}.mark{font-size:30px;line-height:1;color:var(--pink)}.brand b{display:block;font:700 14px/1.1 var(--display);letter-spacing:.05em}.brand small{display:block;margin-top:4px;font:400 11px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.link{border:0;background:none;padding:6px 0;font-size:14px;white-space:nowrap;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--line-strong)}.link:hover{text-decoration-color:var(--pink)}
-main{max-width:1600px;margin:0 auto;padding:0 var(--gutter)}
-.intro{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px 48px;padding:clamp(20px,3vw,34px) 0 clamp(18px,2.4vw,26px)}
-h1{margin:0;font:600 clamp(36px,5vw,72px)/.92 var(--display);letter-spacing:-.05em;text-transform:uppercase}h1 span{color:var(--pink)}
-.intro p{margin:0;max-width:34ch;font-size:clamp(16px,1.4vw,19px);line-height:1.4}.intro p small{display:block;margin-top:6px;font-size:13px;color:var(--muted)}
-/* stepper: every step labelled, grouped by chapter */
-.stepper{position:relative;display:grid;grid-template-columns:repeat(var(--count),minmax(88px,1fr));border-top:1px solid var(--line);overflow-x:auto;scrollbar-width:none}.stepper::-webkit-scrollbar{display:none}
-.chapter-label{grid-row:1;padding:12px 12px 6px 0;font:500 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}.chapter-label.current{color:var(--pink-ink)}
-.step{grid-row:2;position:relative;display:flex;flex-direction:column;gap:2px;min-width:0;padding:4px 10px 14px 0;border:0;background:none;text-align:left}
-.step .num{font:500 11px/1.4 var(--mono);color:var(--muted)}.step .name{font-size:14px;line-height:1.25;font-weight:500;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.step::after{content:'';position:absolute;left:0;right:4px;bottom:0;height:4px;border-radius:2px;background:var(--line);transition:background .2s}
-.step:hover .name,.step.done .name{color:var(--ink)}.step:hover::after{background:var(--line-strong)}.step.done::after{background:#e3a9bf}
-.step.current .name{color:var(--ink);font-weight:700}.step.current .num{color:var(--pink-ink)}.step.current::after{background:var(--pink)}
-.chapter-start{padding-left:14px;border-left:1px solid var(--line)}.step.chapter-start::after{left:14px}
-/* workbench: read · look · try */
-.workbench{display:grid;grid-template-columns:minmax(220px,260px) minmax(0,1fr) minmax(240px,290px);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.narrative{padding:26px 26px 28px 0}.kicker{color:var(--pink-ink)}
-.narrative h2{margin:10px 0 14px;font:500 clamp(26px,2.3vw,34px)/1.08 var(--sans);letter-spacing:-.04em}
-.narrative p{margin:0;font-size:15px;line-height:1.6;color:var(--body)}
-.key{margin:20px 0 0;padding:12px 14px;background:var(--card);border-left:3px solid var(--pink);font-size:14px;line-height:1.5}.key .label{margin-bottom:4px}
-.field{position:relative;display:flex;flex-direction:column;min-width:0;border-left:1px solid var(--line);border-right:1px solid var(--line);background:radial-gradient(ellipse at 50% 48%,#f1d5e04d,transparent 68%)}
-.field-top,.field-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px}.field-bottom{margin-top:auto}
-.badge{font:500 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line-strong);border-radius:99px;padding:6px 10px;white-space:nowrap}
-.field-actions{display:flex;gap:16px}.field-actions .link{font-size:13px}
-.tryit{padding:26px 0 28px 24px}.tryit>.label{color:var(--pink-ink)}.try{margin:8px 0 20px;font-size:15px;line-height:1.5}
-#controls h3{margin:0 0 12px;font-size:20px;font-weight:500;letter-spacing:-.03em}#controls p{font-size:14px;line-height:1.55;color:var(--body);margin:12px 0}#controls .label{margin:18px 0 8px}#controls>.label:first-child{margin-top:0}
-.action{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;margin:16px 0 4px;padding:12px 14px;border:0;border-radius:3px;background:var(--ink);color:#fff;font-size:14px;font-weight:600;text-align:left;transition:background .2s}.action:hover{background:var(--pink-ink)}
-.action.secondary{background:transparent;color:var(--ink);border:1px solid var(--line-strong)}.action.secondary:hover{border-color:var(--pink);background:var(--pale)}
-select{width:100%;padding:9px 10px;border:1px solid var(--line-strong);border-radius:3px;background:var(--card);font-size:14px}
-.segmented{display:flex;gap:6px}.segmented button{flex:1;padding:9px 0;border:1px solid var(--line-strong);border-radius:3px;background:transparent;font:500 13px var(--mono)}.segmented button.active{border-color:var(--pink);background:var(--pale);color:var(--pink-ink)}
-.stat{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}.stat b{font:400 13px var(--mono)}.stat.head{border-top:0;padding-bottom:4px}.stat.head span,.stat.head b{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.prob{margin:12px 0}.prob-title{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px}.prob-title span:last-child{font:13px var(--mono)}.bar{height:4px;border-radius:2px;background:#e6e0dd}.bar i{display:block;height:4px;border-radius:2px;background:var(--pink);transition:width .5s}
-.vector-box{padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:3px;font:13px/1.6 var(--mono);color:var(--pink-ink);word-break:break-word}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{padding:6px 9px;border:1px solid #dcb3c4;border-radius:3px;background:var(--card);font:13px var(--mono);color:var(--pink-ink)}
-details{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}summary{cursor:pointer;font:500 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}summary:hover{color:var(--ink)}details p,details .equation{font-size:13px!important;color:var(--muted)!important}
-.equation{font:13px/1.8 var(--mono);color:var(--pink-ink)!important;margin:10px 0}
-/* pager: always reachable */
-.pager{position:sticky;bottom:0;z-index:10;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:12px 0 14px;background:var(--paper);box-shadow:0 -1px 0 var(--line)}
-.pager button{display:flex;align-items:center;gap:14px;min-width:0;padding:10px 16px;border-radius:3px;text-align:left}.pager button span{min-width:0}.pager button b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pager .arrow{font-size:20px;line-height:1}
-.pager small{display:block;font:500 10px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.75}
-.pager .prev{justify-self:start;border:1px solid var(--line-strong);background:transparent}.pager .prev:not(:disabled):hover{border-color:var(--ink)}
-.pager .next{justify-self:end;border:0;background:var(--ink);color:#fff;min-width:min(240px,100%);justify-content:space-between}.pager .next:hover{background:var(--pink-ink)}
-.count{text-align:center}.count b{display:block;font:500 13px var(--mono)}.count .label{font-size:10px}
-.colophon{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px 20px;padding:16px 0 28px;font-size:12px;color:var(--muted)}.colophon .link{font-size:12px;padding:0}
-dialog{width:min(640px,calc(100% - 32px));max-height:86vh;padding:36px;border:1px solid var(--line);background:var(--paper);color:var(--ink);box-shadow:0 30px 100px #34222c30}dialog::backdrop{background:#32242a66;backdrop-filter:blur(4px)}
-dialog h2{margin:8px 0 16px;font-size:32px;font-weight:500;letter-spacing:-.04em}dialog h3{margin:26px 0 8px;font-size:16px}dialog p{font-size:15px;line-height:1.6;color:var(--body)}dialog a{display:block;margin:10px 0;font-size:14px}dialog .fineprint{font-size:13px;color:var(--muted)}
-.dialog-close{position:absolute;right:14px;top:10px;border:0;background:none;font-size:28px;line-height:1;padding:6px}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-@media(max-width:1180px){.workbench{grid-template-columns:minmax(210px,250px) minmax(0,1fr)}.field{border-right:0}.tryit{grid-column:1/-1;display:grid;grid-template-columns:minmax(210px,250px) minmax(0,1fr);gap:0 26px;padding:22px 0;border-top:1px solid var(--line)}.tryit>.label,.tryit>.try{grid-column:1}#controls{grid-column:2;grid-row:1/span 3}}
-@media(max-width:760px){.workbench{display:block}.narrative{padding:22px 0}.field{border-width:1px 0;border-style:solid;border-color:var(--line)}.field-top,.field-bottom{padding:12px 0}.tryit{display:block;padding:22px 0}.stepper{grid-template-columns:repeat(var(--count),minmax(96px,1fr))}.chapter-label{position:sticky;left:0;justify-self:start;border-left:0}.pager{grid-template-columns:auto 1fr;padding:10px 0 12px}.count{display:none}.pager .prev{padding:12px 14px}.pager .prev span:not(.arrow){display:none}.pager .next{min-width:0;width:100%}dialog{padding:26px}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-/* ── This guide ── */
-.stage{flex:1;display:flex;align-items:center;justify-content:center;width:100%;min-height:380px;padding:8px 20px}
-.stage svg{width:100%;height:auto;max-height:min(440px,calc(100svh - 280px))}canvas{display:block;width:100%;height:auto}
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f4f0"><meta name="description" content="A hands-on, step-by-step guide to text-to-image models, training, diffusion and attention. An interactive explanation for Prompt Denied."><title>Inside the emerging image — Prompt Denied</title><link rel="stylesheet" href="assets/guide.css">
+<style>
+.stage svg{width:100%;height:auto;max-height:440px}canvas{display:block;width:100%;height:auto}
 .visual-stack{width:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
-.image-wrap{width:min(100%,360px,calc(100svh - 330px));min-width:min(100%,240px);border:1px solid #d4c6cc}
+.image-wrap{width:min(100%,360px);border:1px solid #d4c6cc}
 .image-caption,.note-strip{margin:0;font:12px/1.5 var(--mono);letter-spacing:.04em;color:var(--muted);text-align:center;max-width:480px}
 .pair-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:640px}
 .pair{padding:0;border:1px solid var(--line);border-radius:3px;background:var(--card);text-align:left;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s}.pair.active{border-color:var(--pink);transform:translateY(-5px);box-shadow:0 8px 20px #d53d7822}
@@ -71,35 +11,32 @@ dialog h2{margin:8px 0 16px;font-size:32px;font-weight:500;letter-spacing:-.04em
 .flow-row{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;max-width:620px}.flow-row>div{flex:1;min-width:0;text-align:center}.flow-row canvas{border:1px solid var(--line)}
 .flow-row p{margin:8px 0 0;font:11px/1.5 var(--mono);letter-spacing:.06em;color:var(--muted)}.flow-arrow{flex:0 0 auto!important;font-size:22px;color:var(--pink)}
 .phase-pill{display:inline-block;padding:5px 10px;border:1px solid var(--pink);border-radius:99px;font:500 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--pink-ink)}
-.diagram-text{font:15px 'DM Sans',Arial,sans-serif;fill:var(--ink)}.diagram-small{font:11px 'DM Mono',Consolas,monospace;fill:var(--muted);letter-spacing:.5px}
+.diagram-text{font:max(15px,calc(12px*var(--k,1))) 'DM Sans',Arial,sans-serif;fill:var(--ink)}.diagram-small{font:max(11px,calc(9px*var(--k,1))) 'DM Mono',Consolas,monospace;fill:var(--muted);letter-spacing:.5px}
 .attention-word-list{display:flex;flex-wrap:wrap;justify-content:center}.prompt-word{margin:3px;padding:8px 11px;border:1px solid var(--line-strong);border-radius:3px;background:var(--card);font-size:14px}.prompt-word.active{background:var(--pink);border-color:var(--pink);color:#fff}
-.attention-board{position:relative;width:min(100%,340px,calc(100svh - 400px));min-width:min(100%,240px)}.attention-board svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.attention-board{position:relative;width:min(100%,340px)}.attention-board svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;max-width:640px}.mini-grid canvas{border:1px solid var(--line)}.mini-grid p{margin:6px 0 0;font:11px var(--mono);color:var(--muted);text-align:center}
 .control{margin:16px 0}.control label{display:flex;justify-content:space-between;gap:6px;margin-bottom:10px;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.control output{color:var(--pink-ink)}.control input[type=range]{width:100%;accent-color:var(--pink);cursor:pointer}
 .progress-number{font:500 34px/1.1 var(--mono);letter-spacing:-.04em;color:var(--pink-ink)}
-.step-entry{animation:enter .35s ease-out}@keyframes enter{from{opacity:0;transform:translateY(8px)}}
-@media(max-width:760px){.stage{min-height:320px;padding:12px 0}.pair-grid,.mini-grid{gap:8px}.mini-grid{grid-template-columns:repeat(2,1fr)}.pair span{font-size:12px;padding:7px}.flow-row{gap:6px}.flow-row p{font-size:9px}.image-wrap,.attention-board{width:min(100%,340px)}}
+@media(min-width:1000px) and (min-height:600px){.stage svg{height:100%;max-height:none}.visual-stack{max-height:100%}.image-wrap{width:min(360px,100cqw,calc(100cqh - 40px))}.attention-board{width:min(340px,100cqw,calc(100cqh - 110px))}.flow-row{width:min(620px,100cqw,calc((100cqh - 90px)*2 + 120px))}.pair-grid{width:min(640px,100cqw,calc((100cqh - 130px)*3 + 28px))}.mini-grid{width:min(640px,100cqw,calc((100cqh - 90px)*4))}}
+@media(max-width:760px){.pair-grid,.mini-grid{gap:8px}.mini-grid{grid-template-columns:repeat(2,1fr)}.pair span{font-size:12px;padding:7px}.flow-row{gap:6px}.flow-row p{font-size:9px}.image-wrap,.attention-board{width:min(100%,340px)}}
 </style></head>
 <body>
-<header class="top"><a class="brand" href="#step-1"><span class="mark" aria-hidden="true">⊙</span><span><b>PROMPT DENIED</b><small>A field guide to machine imagination</small></span></a><button id="aboutBtn" class="link">About &amp; sources</button></header>
-<main>
-<section class="intro"><h1>Inside the emerging <span>image.</span></h1><p>How do words become something you can see?<small>11 short steps. Read, look, then try it yourself.</small></p></section>
+<main class="guide">
+<section class="intro"><h1><a href="#step-1">Inside the emerging <span>image.</span></a></h1><p>How do words become something you can see?</p></section>
 <nav id="stepper" class="stepper" aria-label="Steps"></nav>
 <section class="workbench">
- <article class="narrative" aria-live="polite"><span class="label kicker" id="kicker"></span><h2 id="stepTitle"></h2><p id="stepBody"></p><div class="key"><span class="label">Key idea</span><span id="keyIdea"></span></div></article>
- <div class="field"><div class="field-top"><span id="sceneLabel" class="label"></span><span class="badge">Illustration · not a live model</span></div><div class="stage" id="stage"></div><div class="field-bottom"><span id="legend" class="label"></span><span class="phase-pill" id="phase"></span></div></div>
+ <article class="narrative"><span class="label kicker" id="kicker"></span><h2 id="stepTitle"></h2><p id="stepBody"></p><div class="key"><span class="label">Key idea</span><span id="keyIdea"></span></div></article>
+ <div class="field"><div class="field-top"><span id="sceneLabel" class="label"></span><span class="badge">Illustration · not a live model</span></div><div class="stage" id="stage"></div><div class="field-bottom"><span id="legend" class="label"></span><span class="pill" id="phase"></span></div></div>
  <aside class="tryit"><span class="label">Try it</span><p id="tryThis" class="try"></p><div id="controls"></div></aside>
 </section>
 <nav class="pager" aria-label="Step navigation"><button id="prev" class="prev"><span class="arrow" aria-hidden="true">←</span><span><small>Back</small><b id="prevTitle"></b></span></button><div class="count"><b id="stepCounter"></b><span class="label">or use ← → keys</span></div><button id="next" class="next"><span><small id="nextKicker">Next</small><b id="nextTitle"></b></span><span class="arrow" aria-hidden="true">→</span></button></nav>
-<footer class="colophon"><span>@SEXTECHSABRINA</span><span>A small map of a very large process.</span><button id="sourcesBtn" class="link">Notes &amp; sources</button></footer>
+<footer class="colophon"><span class="who">@SEXTECHSABRINA · Prompt Denied workshop</span><nav id="guides" aria-label="All guides"></nav><button class="link" data-about>About &amp; sources</button></footer>
 </main>
-<dialog id="about"><button id="closeAbout" class="dialog-close" aria-label="Close notes">×</button><span class="label">The map is not the machine</span><h2>A useful simplification.</h2><p>This guide follows a classic text-conditioned latent diffusion pipeline. Other systems use diffusion transformers, flow matching, or autoregressive image tokens. There is no single architecture shared by every image model.</p><p>All images here are procedural illustrations drawn in your browser. The noise sliders blend a known illustration with seeded noise; they do not run learned denoising. The coloured latent grids, vectors, attention maps, parameter changes and loss values are made-up teaching diagrams, not measured model internals. A real generator does not know its finished image in advance.</p><p>Training learns parameters from examples. Generation uses those parameters and normally does not retrieve training-image fragments. This distinction does not rule out memorization, close reproduction, dataset bias or questions about consent and copyright.</p><p>Words are shown as readable units; real tokenizers may split them into smaller pieces. Image–text associations are learned statistically and are imperfect. One word does not own one image region.</p><h3>Read, explore, make</h3><a href="https://ml4a.github.io/" target="_blank" rel="noopener">ml4a — Machine Learning for Artists / Gene Kogan &amp; collaborators ↗</a><a href="https://arxiv.org/abs/2112.10752" target="_blank" rel="noopener">Rombach et al. — High-Resolution Image Synthesis with Latent Diffusion Models ↗</a><a href="https://arxiv.org/abs/2006.11239" target="_blank" rel="noopener">Ho et al. — Denoising Diffusion Probabilistic Models ↗</a><a href="https://huggingface.co/docs/diffusers/en/api/pipelines/stable_diffusion/stable_diffusion_3" target="_blank" rel="noopener">Diffusers documentation — Stable Diffusion 3 / flow matching ↗</a><a href="https://arxiv.org/abs/2301.13188" target="_blank" rel="noopener">Carlini et al. — Extracting Training Data from Diffusion Models ↗</a><p class="fineprint">An independent workshop guide, inspired by hands-on learning. No affiliation with ml4a. Works offline; no prompts, images or activity are uploaded. Use ← and → to move between steps.</p></dialog>
+<dialog id="about"><button id="closeAbout" class="dialog-close" aria-label="Close notes">×</button><span class="label">The map is not the machine</span><h2>A useful simplification.</h2><p>This guide follows a classic text-conditioned latent diffusion pipeline. Other systems use diffusion transformers, flow matching, or autoregressive image tokens. There is no single architecture shared by every image model.</p><p>All images here are procedural illustrations drawn in your browser. The noise sliders blend a known illustration with seeded noise; they do not run learned denoising. The coloured latent grids, vectors, attention maps, parameter changes and loss values are made-up teaching diagrams, not measured model internals. A real generator does not know its finished image in advance.</p><p>Training learns parameters from examples. Generation uses those parameters and normally does not retrieve training-image fragments. This distinction does not rule out memorization, close reproduction, dataset bias or questions about consent and copyright.</p><p>Words are shown as readable units; real tokenizers may split them into smaller pieces. Image–text associations are learned statistically and are imperfect. One word does not own one image region.</p><h3>Read, explore, make</h3><a href="https://ml4a.github.io/" target="_blank" rel="noopener">ml4a — Machine Learning for Artists / Gene Kogan &amp; collaborators ↗</a><a href="https://arxiv.org/abs/2112.10752" target="_blank" rel="noopener">Rombach et al. — High-Resolution Image Synthesis with Latent Diffusion Models ↗</a><a href="https://arxiv.org/abs/2006.11239" target="_blank" rel="noopener">Ho et al. — Denoising Diffusion Probabilistic Models ↗</a><a href="https://huggingface.co/docs/diffusers/en/api/pipelines/stable_diffusion/stable_diffusion_3" target="_blank" rel="noopener">Diffusers documentation — Stable Diffusion 3 / flow matching ↗</a><a href="https://arxiv.org/abs/2301.13188" target="_blank" rel="noopener">Carlini et al. — Extracting Training Data from Diffusion Models ↗</a><p class="fineprint">An independent workshop guide, inspired by hands-on learning. No affiliation with ml4a. Works offline; no prompts, images or activity are uploaded. Made by @sextechsabrina for the Prompt Denied workshop. Use ← and → to move between steps.</p></dialog>
 <div id="status" class="sr" role="status"></div>
+<script src="assets/guide.js"></script>
 <script>'use strict';
-const $=id=>document.getElementById(id);
-const pad=n=>String(n).padStart(2,'0');
 const pink='#d53d78';
-const chapters=['Learning to see','Making an image'];
 const lessons=[
  {ch:0,type:'pairs',short:'Pairs',kicker:'The premise',title:'A picture starts with a caption.',body:'Image models learn from huge collections of pictures paired with text. Across millions of examples, a model picks up how words relate to what things look like: objects, colours, materials, styles and arrangements.',key:'A caption is a clue, not a full description. Whatever the captions leave out or get wrong, the model learns too.',try:'Click the three image–caption pairs. What does each caption leave out?',scene:'Images ↔ language'},
  {ch:0,type:'features',short:'Patterns',kicker:'Learned patterns',title:'Patterns, at many scales.',body:'A neural network learns features that help with its training task: edges, textures, shapes, whole compositions. These are spread across millions of learned numbers, its parameters.',key:'Think “learned patterns”, not “a drawer full of cut-out images”.',try:'Switch between edges, colour and layout. These are teaching lenses, not real layers inside a model.',scene:'From detail to structure'},
@@ -113,12 +50,11 @@ const lessons=[
  {ch:1,type:'img2img',short:'Img2img',kicker:'Image to image',title:'Start with an image instead.',body:'Image-to-image encodes a picture you supply, adds some noise, then refines it towards the prompt. More noise means more freedom to change; less keeps more of the original.',key:'Your input gives the structure. The prompt guides the change.',try:'Move the strength slider between the source and a toy variation.',scene:'Input → noise → refine'},
  {ch:1,type:'recap',short:'Recap',kicker:'The big picture',title:'Learned patterns. New pixels.',body:'Training links visual patterns to language. Generation uses those patterns, a prompt and random noise to make a new image.',key:'The data shapes what seems “likely”, including its biases, gaps and stereotypes.',try:'Discuss: whose images taught the model, whose bodies are represented, and who decides what it may make?',scene:'Learning is not the same as generating'}
 ];
-const N=lessons.length;
 const prompts=[['a','pink','flower','on a','blue table'],['a','yellow','flower','on a','pink table'],['a','purple','flower','on a','green table']];
-let step=0,preset=0,seed=42,noise=55,progress=0,channel=0,encode=true,feature=0,pair=0,word=2,training=0,strength=45,fineOpen=false,timer=null;
+let preset=0,seed=42,noise=55,progress=0,channel=0,encode=true,feature=0,pair=0,word=2,training=0,strength=45,timer=null;
 function rng(s){let a=s>>>0;return()=>{a+=0x6D2B79F5;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
 function label(s,x,y,small=false,anchor='middle'){return `<text x="${x}" y="${y}" text-anchor="${anchor}" class="${small?'diagram-small':'diagram-text'}">${s}</text>`;}
-function svg(s){return `<svg viewBox="0 0 640 400" role="img" aria-label="${lessons[step].title}">${s}</svg>`;}
+function svg(s){return `<svg viewBox="0 0 640 400" role="img" aria-label="${lessons[Guide.step].title}">${s}</svg>`;}
 function box(x,y,w,h,t,sub,active=false){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${active?'#f6dde6':'#fbfaf7'}" stroke="${active?pink:'#cbbfc4'}"/>${label(t,x+w/2,y+h/2-2)}${label(sub,x+w/2,y+h/2+18,true)}`;}
 function arrow(x1,y1,x2,y2){return `<path d="M ${x1} ${y1} L ${x2} ${y2}" stroke="${pink}" stroke-width="1.3" fill="none"/><circle cx="${x2}" cy="${y2}" r="3" fill="${pink}"/>`;}
 function canvas(id,w=360){return `<canvas id="${id}" width="${w}" height="${w}" role="img" aria-label="Schematic flower illustration"></canvas>`;}
@@ -144,12 +80,12 @@ function range(id,title,val,min=0,max=100,unit='%'){return `<div class="control"
 function buttons(items,current,cls){return `<div class="segmented">${items.map((s,i)=>`<button class="${cls} ${i===current?'active':''}" aria-pressed="${i===current}" data-value="${i}">${s}</button>`).join('')}</div>`;}
 function promptControl(){return `<label class="label" for="preset">Prompt</label><select id="preset">${prompts.map((p,i)=>`<option value="${i}" ${i===preset?'selected':''}>${p.join(' ')}</option>`).join('')}</select>`;}
 function stat(a,b){return `<div class="stat"><span>${a}</span><b>${b}</b></div>`;}
-function fine(...ps){return `<details class="fine" ${fineOpen?'open':''}><summary>Fine print</summary>${ps.map(p=>`<p>${p}</p>`).join('')}</details>`;}
+const fine=(...p)=>Guide.fine(...p);
 const denoiseCaption=()=>progress>=30?'DECODED INTO PIXELS':`UPDATE ${pad(progress)} / 30 · SEED ${seed}`;
 function bindRange(id,fn){$(id)?.addEventListener('input',e=>{const v=+e.target.value;fn(v);$(id+'Out').textContent=v+(id==='progress'?' / 30':'%');if(id==='noise'){noisy($('art'),v/100);$('noiseLabel').textContent=v+'%';}if(id==='progress'){noisy($('art'),Math.pow(1-v/30,1.15));$('caption').textContent=denoiseCaption();$('play').innerHTML='Play the updates <span>▷</span>';}if(id==='strength')blend(v);});}
 function blend(v){flower($('result'),0,42);const c=document.createElement('canvas');c.width=c.height=230;flower(c,2,315);const g=$('result').getContext('2d');g.globalAlpha=v/100;g.drawImage(c,0,0);g.globalAlpha=1;}
 function draw(){
- const type=lessons[step].type,stage=$('stage');let html='',controls='';
+ const type=lessons[Guide.step].type,stage=$('stage');let html='',controls='';
  if(type==='pairs'){
  html=`<div class="visual-stack"><div class="pair-grid">${prompts.map((p,i)=>`<button class="pair ${i===pair?'active':''}" data-value="${i}" aria-pressed="${i===pair}">${canvas('pair'+i,200)}<span><i>Example 0${i+1}</i>${p.join(' ')}</span></button>`).join('')}</div><p class="note-strip">A tiny invented dataset. Real ones hold millions or billions of pairs.</p></div>`;
  controls=`<span class="label">Example 0${pair+1}</span><h3>“${prompts[pair].join(' ')}”</h3><p>Pixels on one side, a description on the other. Nothing here says how big the flower is, what the light is like, or what kind of flower it is.</p>${fine('Captions are often scraped from the web: incomplete, wrong or biased. The model can learn unwanted associations from them.')}`;
@@ -203,7 +139,7 @@ function draw(){
  document.querySelectorAll('.channel').forEach(el=>el.onclick=()=>{channel=+el.dataset.value;draw();});
  document.querySelectorAll('.direction').forEach(el=>el.onclick=()=>{encode=el.dataset.value==='0';draw();});
  document.querySelectorAll('.prompt-word').forEach(el=>el.onclick=()=>{word=+el.dataset.value;draw();});
- document.querySelectorAll('details.fine').forEach(d=>d.ontoggle=()=>{fineOpen=d.open;});
+ Guide.bindFine();
  $('preset')?.addEventListener('change',e=>{preset=+e.target.value;draw();});
  $('newSeed')?.addEventListener('click',()=>{seed=(seed+137)%10000;draw();});
  $('train')?.addEventListener('click',()=>{training++;draw();});
@@ -213,27 +149,6 @@ function draw(){
  if(focused&&$(focused))$(focused).focus({preventScroll:true});
 }
 function stop(){if(timer){clearInterval(timer);timer=null;}}
-function buildStepper(){
- const nav=$('stepper');nav.style.setProperty('--count',N);let html='';
- chapters.forEach((c,ci)=>{const first=lessons.findIndex(l=>l.ch===ci),n=lessons.filter(l=>l.ch===ci).length;html+=`<div class="chapter-label${ci?' chapter-start':''}" data-ch="${ci}" style="grid-column:${first+1} / span ${n}">Chapter ${ci+1} · ${c}</div>`;});
- lessons.forEach((l,i)=>{html+=`<button class="step${i&&l.ch!==lessons[i-1].ch?' chapter-start':''}" data-step="${i}" style="grid-column:${i+1}" title="${i+1}. ${l.title}"><span class="num">${pad(i+1)}</span><span class="name">${l.short}</span></button>`;});
- nav.innerHTML=html;nav.querySelectorAll('.step').forEach(b=>b.onclick=()=>go(+b.dataset.step));
-}
-function go(n,announce=true){stop();step=Math.max(0,Math.min(N-1,n));const l=lessons[step];
- $('kicker').textContent=`Step ${pad(step+1)} · ${l.kicker}`;$('stepTitle').textContent=l.title;$('stepBody').textContent=l.body;$('keyIdea').textContent=l.key;$('tryThis').textContent=l.try;$('sceneLabel').textContent=l.scene;
- $('phase').textContent=l.type==='recap'?'Recap':l.ch?'Generation':'Training';$('legend').textContent=l.type==='recap'?'Two different phases':l.ch?'Parameters stay fixed here':'Parameters are learned here';
- $('stepCounter').textContent=`Step ${step+1} of ${N}`;$('prev').disabled=step===0;$('prevTitle').textContent=step?lessons[step-1].short:'—';
- $('nextKicker').textContent=step===N-1?'Finished':'Next';$('nextTitle').textContent=step===N-1?'Start again':lessons[step+1].short;
- document.querySelectorAll('.step').forEach((el,j)=>{el.classList.toggle('current',j===step);el.classList.toggle('done',j<step);if(j===step)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});
- document.querySelectorAll('.chapter-label').forEach(el=>el.classList.toggle('current',+el.dataset.ch===l.ch));
- const cur=document.querySelector('.step.current'),nav=$('stepper');if(cur&&nav.scrollWidth>nav.clientWidth)nav.scrollTo({left:cur.offsetLeft-nav.clientWidth/2+cur.offsetWidth/2,behavior:announce?'smooth':'auto'});
- draw();$('stage').classList.remove('step-entry');void $('stage').offsetWidth;$('stage').classList.add('step-entry');
- history.replaceState(null,'',`#step-${step+1}`);if(announce)$('status').textContent=`Step ${step+1} of ${N}: ${l.title}`;}
-buildStepper();
-$('prev').onclick=()=>go(step-1);$('next').onclick=()=>go((step+1)%N);
-$('aboutBtn').onclick=$('sourcesBtn').onclick=()=>{stop();$('about').showModal();};$('closeAbout').onclick=()=>$('about').close();$('about').onclick=e=>{if(e.target===$('about')){const r=$('about').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('about').close();}};
-document.querySelector('.brand').onclick=e=>{e.preventDefault();go(0);};
-document.addEventListener('keydown',e=>{if($('about').open||['SELECT','INPUT','TEXTAREA'].includes(document.activeElement?.tagName)||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key==='ArrowRight'){e.preventDefault();go(step+1);}if(e.key==='ArrowLeft'){e.preventDefault();go(step-1);}});
-window.addEventListener('hashchange',()=>{const n=Number(location.hash.replace('#step-',''))-1;if(Number.isInteger(n)&&n>=0&&n<N&&n!==step)go(n);});
-go(Math.max(0,Math.min(N-1,(Number(location.hash.replace('#step-',''))||1)-1)),false);
+function phase(){const l=lessons[Guide.step];$('phase').textContent=l.type==='recap'?'Recap':l.ch?'Generation':'Training';$('legend').textContent=l.type==='recap'?'Two different phases':l.ch?'Parameters stay fixed here':'Parameters are learned here';}
+Guide.init({chapters:['Learning to see','Making an image'],lessons,draw:()=>{phase();draw();},leave:stop});
 </script></body></html>

@@ -12,24 +12,30 @@ Inspired by [ml4a — Machine Learning for Artists](https://ml4a.github.io/), by
 
 ## What's here so far?
 
-Two interactive guides to get started:
+Four interactive guides:
 
 - [Inside the next word](./Inside-the-next-word.html) — how language models turn text into tokens, use attention, and choose what comes next.
 - [Inside the emerging image](./Inside-the-emerging-image.html) — how image models learn, and how prompts, noise, and a few other ingredients lead to an image.
+- [Inside the refusal](./Inside-the-refusal.html) — the layers AI companies use to keep sexual content out: filtering training data, erasing concepts, teaching refusals, checking prompts and outputs. And what gets blocked by mistake (yes, aubergines too).
+- [Inside the map](./Inside-the-map.html) — how a model learns which things look alike, shown with a real UMAP map of 864 vibrators.
 
-These start with general examples. The idea is to get a feel for the basics, then use that understanding to play around with sex-tech projects.
+The first two start with general examples. The idea is to get a feel for the basics, then use that understanding to look at how these systems treat sex and sex tech.
 
-Each guide has about ten short steps. Pick a step from the bar at the top, or use the Back / Next buttons (or the ← → keys). Every step has a short explanation, a picture, and a "Try it" panel where you can click buttons, move sliders, and see what changes. They're simplified demos, not actual AI models running in your browser. There are notes and links inside each guide if you want to dig further.
+Each guide has about ten short steps and fits on one screen, so it works well on a projector. Pick a step from the bar at the top, or use the Back / Next buttons (or the ← → keys). Every step has a short explanation, a picture, and a "Try it" panel where you can click buttons, move sliders, and see what changes. Most are simplified demos, not actual AI models running in your browser; the map guide uses real data. There are notes and links inside each guide if you want to dig further.
 
 ## Try them
 
 1. Download this repo using **Code → Download ZIP** and unzip it, or clone it if you use Git.
-2. Open either HTML file in your browser.
+2. Open any of the HTML files in your browser. Keep the `assets` folder next to them: it holds the shared styles, navigation and map data.
 3. Click around!
 
 No setup or API key needed. On GitHub you'll see the code, so download the files to use the guides.
 
 The demos run locally and don't send prompts to an AI service. The guides load Google Fonts when you're online, but work without them too.
+
+### Product photos in the map guide
+
+The map guide is built from my vibrator UMAP experiment: product photos from one online shop, turned into numbers with CLIP and laid out with UMAP. The photos belong to the shop, so they aren't in this repo; the guide shows labelled dots and tiles instead. If you have the photos, put them in a `map-photos/` folder next to the HTML files (named like `product_0000.jpg`) and the guide shows them automatically.
 
 ## More to come, probably :)
 

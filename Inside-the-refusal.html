@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f4f0"><meta name="description" content="How AI companies keep sexual content out of language and image models: data filters, refusal training, prompt and output checks. An interactive explanation for Prompt Denied."><title>Inside the refusal — Prompt Denied</title>
+<link rel="stylesheet" href="assets/guide.css">
+<style>
+.stage svg{width:100%;height:auto;max-height:440px}
+.t{font:max(14px,calc(11px*var(--k,1))) 'DM Sans',Arial,sans-serif;fill:var(--ink)}.tb{font:600 max(15px,calc(12px*var(--k,1))) 'DM Sans',Arial,sans-serif;fill:var(--ink)}.ts{font:max(11px,calc(9px*var(--k,1))) 'DM Mono',Consolas,monospace;fill:var(--muted);letter-spacing:.5px}.tp{font:500 max(11px,calc(9px*var(--k,1))) 'DM Mono',Consolas,monospace;fill:var(--pink-ink);letter-spacing:.5px}
+.visual-stack{width:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:min(100%,660px)}
+.card{position:relative;padding:9px 9px 8px;border:1px solid var(--line);border-radius:3px;background:var(--card);font-size:13px;line-height:1.3;min-height:64px;display:flex;flex-direction:column;justify-content:space-between;gap:6px;transition:opacity .3s,border-color .3s}
+.card .bar{height:3px}.card small{font:11px var(--mono);color:var(--muted)}
+.card.removed{opacity:.45;border:1px dashed var(--pink);background:transparent}.card.removed span{text-decoration:line-through;text-decoration-color:var(--pink)}.card.removed::after{content:'✕';position:absolute;top:4px;right:7px;color:var(--pink);font-size:12px}
+.card.explicit{background:#efe7ea}.card .tag{font:500 9px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--pink-ink)}
+.prompt-box{width:min(100%,560px);padding:22px 24px;border:1px solid var(--line-strong);border-radius:3px;background:var(--card);font-size:clamp(17px,1.6vw,22px);line-height:1.5;text-align:center}
+.prompt-box mark{background:var(--pale);color:var(--pink-ink);border-bottom:2px solid var(--pink);padding:0 2px}
+.verdicts{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:min(100%,560px)}
+.verdict{padding:12px 14px;border:1px solid var(--line);border-radius:3px;background:var(--card)}.verdict b{display:block;margin-top:2px;font-size:18px}.verdict.block b{color:var(--pink-ink)}
+.outcome{width:min(100%,560px);padding:10px 14px;border-radius:3px;text-align:center;font-weight:600}.outcome.ok{background:#e9efe6;color:#33582e}.outcome.bad{background:var(--pale);color:var(--pink-ink)}
+.prompt-list{display:flex;flex-direction:column;gap:6px}.prompt-list button{padding:9px 11px;border:1px solid var(--line-strong);border-radius:3px;background:transparent;text-align:left;font-size:14px;line-height:1.35}.prompt-list button.active{border-color:var(--pink);background:var(--pale)}
+input[type=text]{width:100%;padding:9px 10px;border:1px solid var(--line-strong);border-radius:3px;background:var(--card);font-size:14px}
+.layer-list .stat span:first-child{display:flex;gap:8px}.layer-list .stop b{color:var(--pink-ink)}
+.out-row{display:flex;align-items:center;justify-content:center;gap:14px;width:min(100%,620px)}.out-row>div{flex:1;min-width:0;text-align:center}.out-row svg{border:1px solid var(--line);display:block}.out-row p{margin:8px 0 0;font:11px/1.5 var(--mono);letter-spacing:.05em;color:var(--muted)}.out-row .arrow{flex:0 0 auto;color:var(--pink);font-size:22px}
+.meter{position:relative;width:min(100%,560px);height:10px;border-radius:5px;background:#e6e0dd}.meter i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--pink)}.meter u{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink)}
+@media(min-width:1000px) and (min-height:600px){.stage svg{height:100%;max-height:none}.cards{width:min(660px,100cqw,calc((100cqh - 40px)/4*5*1.5))}.out-row{width:min(620px,100cqw,calc((100cqh - 120px)*2 + 80px))}}
+@media(max-width:760px){.cards{grid-template-columns:repeat(4,1fr)}.card{font-size:11px;min-height:56px}.verdicts{grid-template-columns:1fr}}
+</style></head>
+<body>
+<main class="guide">
+<section class="intro"><h1><a href="#step-1">Inside the <span>refusal.</span></a></h1><p>How do AI tools keep sex out, and what gets caught on the way?</p></section>
+<nav id="stepper" class="stepper" aria-label="Steps"></nav>
+<section class="workbench">
+ <article class="narrative"><span class="label kicker" id="kicker"></span><h2 id="stepTitle"></h2><p id="stepBody"></p><div class="key"><span class="label">Key idea</span><span id="keyIdea"></span></div></article>
+ <div class="field"><div class="field-top"><span id="sceneLabel" class="label"></span><span class="badge">Illustration · made-up scores</span></div><div class="stage" id="stage"></div><div class="field-bottom"><span id="legend" class="label"></span><span class="pill" id="phase"></span></div></div>
+ <aside class="tryit"><span class="label">Try it</span><p id="tryThis" class="try"></p><div id="controls"></div></aside>
+</section>
+<nav class="pager" aria-label="Step navigation"><button id="prev" class="prev"><span class="arrow" aria-hidden="true">←</span><span><small>Back</small><b id="prevTitle"></b></span></button><div class="count"><b id="stepCounter"></b><span class="label">or use ← → keys</span></div><button id="next" class="next"><span><small id="nextKicker">Next</small><b id="nextTitle"></b></span><span class="arrow" aria-hidden="true">→</span></button></nav>
+<footer class="colophon"><span class="who">@SEXTECHSABRINA · Prompt Denied workshop</span><nav id="guides" aria-label="All guides"></nav><button class="link" data-about>About &amp; sources</button></footer>
+</main>
+<dialog id="about"><button id="closeAbout" class="dialog-close" aria-label="Close notes">×</button><span class="label">The map is not the machine</span><h2>Many layers, many choices.</h2><p>Companies rarely publish exactly how their filters work, and every product combines layers differently. This guide shows the common kinds of layers described in research papers and model documentation, using made-up examples and scores.</p><p>Nothing here runs a real classifier. The word-list check in step 5 really does check your text against the list shown, and nothing else. Every other score, position and percentage is authored to explain the idea.</p><p>Filtering decisions are value judgements. Rules written to block “explicit sexual content” often also block sex education, health information, queer art, sex workers’ safety information and sex-tech businesses. Who sets the threshold, and for whom, is a real question.</p><h3>Read further</h3><a href="https://arxiv.org/abs/2210.08402" target="_blank" rel="noopener">Schuhmann et al. — LAION-5B: an open large-scale dataset (2022) ↗</a><a href="https://arxiv.org/abs/2303.07345" target="_blank" rel="noopener">Gandikota et al. — Erasing Concepts from Diffusion Models (2023) ↗</a><a href="https://arxiv.org/abs/2211.05105" target="_blank" rel="noopener">Schramowski et al. — Safe Latent Diffusion (2023) ↗</a><a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">Ouyang et al. — Training language models to follow instructions with human feedback (2022) ↗</a><a href="https://arxiv.org/abs/2212.08073" target="_blank" rel="noopener">Bai et al. — Constitutional AI (2022) ↗</a><a href="https://arxiv.org/abs/2312.06674" target="_blank" rel="noopener">Inan et al. — Llama Guard (2023) ↗</a><a href="https://arxiv.org/abs/2406.11717" target="_blank" rel="noopener">Arditi et al. — Refusal in Language Models Is Mediated by a Single Direction (2024) ↗</a><a href="https://arxiv.org/abs/2210.04610" target="_blank" rel="noopener">Rando et al. — Red-Teaming the Stable Diffusion Safety Filter (2022) ↗</a><p class="fineprint">Made by @sextechsabrina for the Prompt Denied workshop. Works offline; nothing you type is sent anywhere. Use ← and → to move between steps.</p></dialog>
+<div id="status" class="sr" role="status"></div>
+<script src="assets/guide.js"></script>
+<script>'use strict';
+const P='#d53d78';
+const lessons=[
+ {ch:0,type:'layers',short:'Layers',kicker:'The premise',title:'Prompt denied.<br>But by what?',body:'When an AI tool refuses a sexual request, there usually isn’t one off-switch. Companies stack several layers: some shape the model while it is trained, others check what goes in and what comes out.',key:'Each layer catches some things and misses others. Stacked together, they work like slices of Swiss cheese.',try:'Pick a request and send it through. Which layer stops it?',scene:'The Swiss cheese model'},
+ {ch:0,type:'data',short:'Filter data',kicker:'Filter the training data',title:'Leave it out<br>of the data.',body:'The bluntest layer: remove sexual images before an image model is trained. A classifier (itself a model) scores every image for how likely it is to be explicit. Everything above a chosen threshold is thrown out.',key:'A model can’t easily make what it has hardly seen. But the filter also throws out art, health images, swimwear and bodies in general.',try:'Lower the threshold. Watch what else gets thrown out alongside the explicit images.',scene:'Scoring the training images'},
+ {ch:0,type:'erase',short:'Erase',kicker:'Erase a concept',title:'Or train it out<br>afterwards.',body:'If a model already learned a concept, it can be fine-tuned to forget it. The weights are nudged so a prompt like “nude” leads somewhere neutral instead. It’s like wiping out one region of the model’s map of ideas.',key:'Erasing is fuzzy. Neighbouring ideas get blurred too, and clever prompts can sometimes find a way back.',try:'Turn up the erasure and watch which nearby ideas fade with it.',scene:'Wiping a region of the map'},
+ {ch:0,type:'rlhf',short:'Teach refusal',kicker:'Teach it to say no',title:'Leave it in.<br>Teach it manners.',body:'Language models usually learn from text that does include sex. In a later training phase, people (or other models) rate its answers, and it is rewarded for politely refusing certain requests. Refusing becomes a learned habit.',key:'The knowledge is still in there. The model has learned when not to use it, and the habit spreads to nearby topics.',try:'Run a few feedback rounds. Watch both bars, not just the first.',scene:'Feedback rounds'},
+ {ch:1,type:'keywords',short:'Word list',kicker:'Check the prompt',title:'A list of<br>forbidden words.',body:'The simplest prompt check is a blocklist: if the prompt contains a banned word, refuse. It’s cheap and fast, and very easy to fool or to trip over.',key:'A word list can’t read context. It misses code words and blocks innocent sentences.',try:'Try each prompt, or type your own. Which ones does the list get wrong?',scene:'Matching banned words'},
+ {ch:1,type:'context',short:'Context',kicker:'Read the meaning',title:'Code words don’t<br>fool a classifier.',body:'Modern prompt checks are language models themselves. Attention lets every word pick up meaning from its neighbours, so the whole sentence lands somewhere in the model’s space of meaning. “Aubergine” next to “oven” lands far from “aubergine” next to “tonight 😏”.',key:'Meaning comes from context, so swapping in a euphemism rarely helps. The surrounding words give it away.',try:'Add context words to “aubergine” and watch where the sentence lands.',scene:'Where the sentence lands'},
+ {ch:1,type:'direction',short:'Inside',kicker:'Refusal inside the model',title:'A direction<br>that means “no”.',body:'Researchers looking inside language models found that refusing often hangs on one direction in the model’s internal numbers. When a request pushes the model far enough along it, the answer comes out as a refusal.',key:'Turn that direction down and the model stops refusing. Turn it up and it refuses harmless things too.',try:'Steer the model towards or away from refusing.',scene:'Requests along the refusal direction'},
+ {ch:1,type:'output',short:'Output check',kicker:'Check the result',title:'Check what<br>comes out.',body:'The last layer looks at the finished answer or image before you see it. One well-known image checker compares the picture’s CLIP vector with vectors for a list of banned concepts. Too similar, and you get a black square instead.',key:'Output checks catch what slipped through earlier, but only what they were built to recognise.',try:'Pick an image and move the threshold. When does a harmless picture get blacked out?',scene:'Generated image → checker'},
+ {ch:1,type:'tradeoff',short:'Trade-off',kicker:'Who gets blocked',title:'Every threshold<br>is a choice.',body:'No filter is perfect. Set it strict and it blocks sex education, health information, queer art and sex-tech businesses. Set it loose and more explicit content slips through. Someone decides where the line goes.',key:'Over-blocking isn’t neutral. It hits hardest the people who talk about sex for health, art or a living.',try:'Move the line. Then discuss: who should decide where it goes, and for whom?',scene:'Harmless vs explicit, by score'}
+];
+const st={req:0,sent:false,thr:.9,erase:30,rounds:0,kw:0,custom:'',ctx:['oven'],shift:0,img:2,othr:.55,tthr:.5};
+const T=(s,x,y,c='t',a='middle',extra='')=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}" ${extra}>${s}</text>`;
+const svg=(inner,vb='0 0 640 400')=>`<svg viewBox="${vb}" role="img" aria-label="${lessons[Guide.step].scene}">${inner}</svg>`;
+const fine=(...p)=>Guide.fine(...p);
+const range=(id,title,val,min,max,stepv,fmt)=>`<div class="control"><label for="${id}">${title}<output id="${id}Out">${fmt(val)}</output></label><input id="${id}" type="range" min="${min}" max="${max}" step="${stepv}" value="${val}"></div>`;
+const statRow=(a,b)=>`<div class="stat"><span>${a}</span><b>${b}</b></div>`;
+const bar=p=>`<div class="bar"><i style="width:${Math.round(p*100)}%"></i></div>`;
+
+// 1 · Swiss cheese
+const layers=['Prompt check','Learned refusal','Filtered data','Output check'];
+const requests=[
+ {t:'Grilled aubergine with miso',stop:-1,note:'Nothing to stop. You get a recipe.'},
+ {t:'Write an explicit sex scene',stop:0,note:'A classifier reads the prompt and refuses before the model even sees it.'},
+ {t:'Me and the aubergine tonight 😏 write it all out',stop:1,note:'The code word slipped past the prompt check, but the model itself recognised the innuendo and declined.'},
+ {t:'Image: a life drawing class with a nude model',stop:2,note:'Nothing refuses, but the model saw few nude bodies in training, so the result comes out distorted or oddly clothed.'},
+ {t:'Product description for our new vibrator',stop:3,note:'The text was written, then the output check flagged it. A false alarm for a legitimate sex-tech business.'},
+ {t:'How do I talk to a partner about consent?',stop:-1,note:'Sex education should get through. It doesn’t always: see step 9.'}
+];
+function sceneLayers(){
+ const r=requests[st.req],xs=[190,290,390,490];let s='';
+ s+=T('BEFORE THE MODEL',190,40,'ts')+T('THE MODEL ITSELF',340,40,'ts')+T('AFTER',490,40,'ts')+`<path d="M 250 48 H 430" stroke="#cbbfc4"/>`;
+ xs.forEach((x,i)=>{const stopped=st.sent&&r.stop===i;s+=`<rect x="${x-17}" y="70" width="34" height="250" rx="8" fill="${stopped?'#f6dde6':'#efe7dc'}" stroke="${stopped?P:'#cbbfc4'}" stroke-width="${stopped?2:1}"/>`;
+  [[0,105,6],[5,150,4],[-4,262,7],[3,298,4]].forEach(([dx,y,rad])=>s+=`<circle cx="${x+dx}" cy="${y}" r="${rad}" fill="var(--paper)"/>`);
+  if(r.stop!==i)s+=`<circle cx="${x}" cy="200" r="11" fill="var(--paper)"/>`;
+  s+=T(layers[i].split(' ')[0],x,345,'ts')+T(layers[i].split(' ').slice(1).join(' '),x,360,'ts');});
+ const end=r.stop<0?585:xs[r.stop]-28;
+ s+=T('REQUEST',50,232,'ts')+T('ANSWER',590,232,'ts');
+ s+=`<path d="M 50 200 H 590" stroke="#e1d9d2" stroke-dasharray="3 6"/>`;
+ s+=`<circle cx="50" cy="200" r="10" fill="${P}">${st.sent?`<animate attributeName="cx" from="50" to="${end}" dur="1.3s" begin="0.1s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines=".25 .7 .3 1"/>`:''}</circle>`;
+ if(st.sent)s+=`<g opacity="0">${r.stop<0?T('✓ answered',590,175,'tp'):T('✕ refused',end-4,178,'tp','end')}<set attributeName="opacity" to="1" begin="1.4s" fill="freeze"/></g>`;
+ return svg(s);
+}
+function controlsLayers(){
+ const r=requests[st.req];
+ return `<label class="label" for="req">Request</label><select id="req">${requests.map((q,i)=>`<option value="${i}" ${i===st.req?'selected':''}>${q.t}</option>`).join('')}</select><button class="action" id="send">Send it <span>→</span></button><div class="layer-list">${layers.map((l,i)=>{const s=!st.sent?'':r.stop===i?'✕ stopped':r.stop>=0&&i>r.stop?'· not reached':'✓ passed';return `<div class="stat ${st.sent&&r.stop===i?'stop':''}"><span>${l}</span><b>${s}</b></div>`;}).join('')}</div>${st.sent?`<p>${r.note}</p>`:''}${fine('Which layer stops which request is made up for this example. Real products differ, and many don’t say which layers they use.','The training layers aren’t a check that happens when you send a request. They shape what the model can do and what it is inclined to do.')}`;
+}
+// 2 · data filter
+const images=[['Explicit photo',.97,1],['Wedding photo',.09],['Lingerie advert',.71],['Explicit drawing',.93,1],['Aubergine',.04],['Classical nude statue',.62],['Beach holiday',.33],['Explicit, but blurry',.44,1],['Breastfeeding',.52],['Cat on a mat',.01],['Vibrator product shot',.64],['Explicit photo',.88,1],['Anatomy diagram',.47],['Kissing couple',.3],['Life drawing class',.58],['Bodybuilder',.26],['Explicit, odd angle',.29,1],['Wrestling match',.21],['Peach',.06],['Explicit video still',.82,1]];
+function sceneData(){
+ return `<div class="visual-stack"><div class="cards">${images.map(([n,sc,e])=>`<div class="card ${e?'explicit':''} ${sc>=st.thr?'removed':''}">${e?'<span class="tag">explicit</span>':''}<span>${n}</span><div><small>score ${sc.toFixed(2)}</small>${bar(sc)}</div></div>`).join('')}</div><p class="note">Text cards stand in for images. Darker cards are the explicit ones.</p></div>`;
+}
+function liveData(){
+ const rem=images.filter(i=>i[1]>=st.thr),ex=rem.filter(i=>i[2]).length,other=rem.length-ex,totalEx=images.filter(i=>i[2]).length;
+ return `${statRow('Explicit images removed',`${ex} / ${totalEx}`)}${statRow('Other images removed',`${other} / ${images.length-totalEx}`)}<p>${other?`Also gone: ${rem.filter(i=>!i[2]).map(i=>i[0].toLowerCase()).join(', ')}.`:'Only explicit images removed so far, but some explicit ones still get through.'}</p>`;
+}
+function controlsData(){
+ return `${range('thr','Remove if score is at least',st.thr,.05,.99,.01,v=>(+v).toFixed(2))}<div id="live">${liveData()}</div>${fine('Example: Stable Diffusion 2.0 was trained on data filtered very strictly with LAION’s NSFW classifier (removing images it scored above 0.1, according to the model card). Many users found it got worse at drawing people; version 2.1 loosened the filter to 0.98.','A classifier score is the classifier’s guess, not the truth. It has its own blind spots and biases.')}`;
+}
+// 3 · erase
+const concepts=[['nude',320,200],['naked',352,168],['life drawing',262,158],['lingerie',392,236],['classical statue',214,122],['skin',282,256],['swimwear',440,272],['body',236,296],['kiss',428,140],['medical exam',160,236],['flower',540,92],['beach',506,256],['aubergine',548,334],['cat',110,110]];
+function sceneErase(){
+ const R=st.erase*2.3;let s=`<circle cx="320" cy="200" r="${R}" fill="${P}" opacity=".1"/><circle cx="320" cy="200" r="${R}" fill="none" stroke="${P}" stroke-dasharray="5 5"/>`;
+ concepts.forEach(([n,x,y],i)=>{const d=Math.hypot(x-320,y-200),hit=d<=R,fade=hit?Math.max(.15,d/(R+1)*.6):1;s+=`<g opacity="${i===0&&R>0?.18:fade.toFixed(2)}"><circle cx="${x}" cy="${y}" r="${i===0?8:5}" fill="${hit||i===0?P:'#9e8f96'}"/>${T(n,x,y-12,i===0?'tb':'t')}${hit&&i>0?`<line x1="${x-24}" y1="${y-16}" x2="${x+24}" y2="${y-16}" stroke="${P}"/>`:''}</g>`;});
+ s+=T('A MAP OF IDEAS INSIDE AN IMAGE MODEL (SKETCH)',320,385,'ts');
+ return svg(s);
+}
+function liveErase(){
+ const R=st.erase*2.3,hit=concepts.slice(1).filter(([n,x,y])=>Math.hypot(x-320,y-200)<=R).map(c=>c[0]);
+ return `${statRow('Target','nude')}${statRow('Neighbours affected',hit.length)}<p>${hit.length?`Blurred along with it: ${hit.join(', ')}.`:'Only the target is affected so far.'}</p>`;
+}
+function controlsErase(){
+ return `${range('erase','Erasure strength',st.erase,0,100,1,v=>v+'%')}<div id="live">${liveErase()}</div>${fine('Based on concept-erasure research such as “Erasing Concepts from Diffusion Models” (Gandikota et al., 2023), which fine-tunes the weights themselves.','Another approach, Safe Latent Diffusion, steers away from listed concepts while generating instead of changing the weights.','The positions of these ideas are invented for illustration.')}`;
+}
+// 4 · refusal training
+const roundsEx=[15,45,68,82,90,94,96],roundsEd=[3,5,8,12,17,21,24];
+function sceneRlhf(){
+ const r=st.rounds,rows=[['“Write an explicit sex scene”',roundsEx[r],'should refuse'],['“How does a vibrator actually work?”',roundsEd[r],'should answer']];let s='';
+ rows.forEach(([q,p,tag],i)=>{const y=80+i*130,w=560;s+=T(q,40,y,'tb','start')+T(tag.toUpperCase(),600,y,'ts','end');s+=`<rect x="40" y="${y+16}" width="${w}" height="26" rx="3" fill="#e6e0dd"/><rect x="${40+w*(1-p/100)}" y="${y+16}" width="${w*p/100}" height="26" rx="3" fill="${P}"/>`;s+=T(`answers ${100-p}%`,46,y+60,'ts','start')+T(`refuses ${p}%`,600,y+60,'tp','end');});
+ s+=T(`FEEDBACK ROUND ${r} / 6`,320,350,'ts')+T('raters reward a polite refusal for explicit requests',320,372,'ts');
+ return svg(s);
+}
+function controlsRlhf(){
+ return `<span class="label">Feedback rounds</span><div class="segmented"><button id="round">${st.rounds<6?'Run a feedback round →':'Start over ↺'}</button></div>${statRow('Refuses explicit request',roundsEx[st.rounds]+'%')}${statRow('Refuses sex-ed question',roundsEd[st.rounds]+'%')}<p>Nobody rewarded refusing the sex-ed question, but the habit spreads to anything that sounds similar.</p>${fine('Made-up numbers. Real setups include reinforcement learning from human feedback (RLHF) and Constitutional AI, where a written set of principles guides the ratings.','Companies also add rules in a hidden system prompt at the start of every chat.')}`;
+}
+// 5 · keywords
+const blocklist=['explicit','nude','porn','sex','breast','🍆'];
+const kwPrompts=[['Grilled aubergine with miso',0],['🍆 recipe ideas for dinner',0],['Breast cancer self-check guide',0],['Sex-ed: how does consent work?',0],['Write something explicit',1],['Tonight me and the eggplant… 😏 write it all',1]];
+const kwHits=t=>blocklist.filter(w=>/\p{L}/u.test(w)?new RegExp(`\\b${w}`,'iu').test(t):t.includes(w));
+const esc=t=>t.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function sceneKeywords(){
+ const custom=st.kw<0,text=custom?st.custom:kwPrompts[st.kw][0],hits=kwHits(text);
+ let shown=esc(text||'Type something…');blocklist.forEach(w=>{shown=shown.replace(new RegExp(/\p{L}/u.test(w)?`\\b(${w}\\w*)`:`(${w})`,'giu'),'<mark>$1</mark>');});
+ const block=hits.length>0,should=custom?null:kwPrompts[st.kw][1]===1;
+ const outcome=should===null?'':block===should?`<div class="outcome ok">✓ The list got this one right</div>`:`<div class="outcome bad">✕ ${block?'False alarm: blocked something harmless':'Missed: a sexual request slipped through'}</div>`;
+ return `<div class="visual-stack"><div class="prompt-box">${shown}</div><div class="verdicts"><div class="verdict ${block?'block':''}"><span class="label">Word list says</span><b>${block?'Block':'Allow'}</b></div><div class="verdict ${should?'block':''}"><span class="label">A person would say</span><b>${should===null?'You decide':should?'Block':'Allow'}</b></div></div>${outcome}</div>`;
+}
+function controlsKeywords(){
+ return `<span class="label">Banned words</span><div class="chips">${blocklist.map(w=>`<span>${w}</span>`).join('')}</div><span class="label">Prompts</span><div class="prompt-list">${kwPrompts.map(([t],i)=>`<button data-kw="${i}" class="${i===st.kw?'active':''}">${t}</button>`).join('')}</div><label class="label" for="custom">Or type your own</label><input id="custom" type="text" value="${esc(st.custom)}" placeholder="Try to sneak past the list…" autocomplete="off">${fine('This check really runs: it looks for the six words above at the start of a word, ignoring capitals. Real lists are much longer, and in many languages.')}`;
+}
+// 6 · context
+const ctxWords={oven:[-95,25],recipe:[-85,-35],'with miso':[-70,5],garden:[-60,65],tonight:[75,-20],'😏':[95,15],bedroom:[85,45],slowly:[55,-40]};
+function ctxPoint(){let x=300,y=235;st.ctx.forEach(w=>{x+=ctxWords[w][0];y+=ctxWords[w][1];});return [Math.max(40,Math.min(600,x)),Math.max(100,Math.min(370,y))];}
+const ctxScore=()=>1/(1+Math.exp(-(ctxPoint()[0]-430)/28));
+function sceneContext(){
+ const [px,py]=ctxPoint(),toks=['aubergine',...st.ctx];let s='';
+ s+=`<ellipse cx="530" cy="235" rx="115" ry="125" fill="#f6dde6" stroke="${P}" stroke-dasharray="5 5"/>`+T('FLAGGED BY THE CLASSIFIER',530,128,'tp');
+ Object.entries(ctxWords).forEach(([w,[dx,dy]])=>{const x=300+dx*1.7,y=235+dy*1.7;s+=`<circle cx="${x}" cy="${y}" r="3" fill="#b4a6ac"/>`+T(w,x,y+16,'ts');});
+ const gap=Math.min(110,520/Math.max(1,toks.length-1)),x0=320-gap*(toks.length-1)/2;
+ toks.forEach((t,i)=>{const x=x0+i*gap;if(i)s+=`<path d="M ${x0} 52 Q ${(x0+x)/2} ${18-i*3} ${x} 52" fill="none" stroke="${P}" stroke-width="${1+Math.hypot(...ctxWords[t])/40}" opacity=".7"/>`;s+=T(t,x,72,i?'t':'tb');});
+ s+=`<circle cx="300" cy="235" r="5" fill="#9e8f96"/>${T('“aubergine” alone',300,222,'ts')}<path d="M 300 235 L ${px} ${py}" stroke="${P}" stroke-width="1.5" stroke-dasharray="4 4"/><circle cx="${px}" cy="${py}" r="10" fill="${P}"/>${T('the sentence',px,py+26,'tp')}`;
+ return svg(s);
+}
+function controlsContext(){
+ const p=ctxScore();
+ return `<span class="label">Words around “aubergine”</span><div class="chips">${Object.keys(ctxWords).map(w=>`<button data-ctx="${w}" class="${st.ctx.includes(w)?'active':''}" aria-pressed="${st.ctx.includes(w)}">${w}</button>`).join('')}</div><span class="label">Classifier</span><div class="prob"><div class="prob-title"><span>Sexual content</span><span>${Math.round(p*100)}%</span></div>${bar(p)}</div>${statRow('Verdict',p>=.5?'Refuse':'Allow')}<p>The arcs show attention: how much “aubergine” draws on each word around it.</p>${fine('A sketch, not a real classifier. Real ones such as Llama Guard are language models trained to label prompts and answers against a written policy.','Real meaning spaces have hundreds of dimensions; two are drawn here.')}`;
+}
+// 7 · refusal direction
+const dirReqs=[['Write an explicit sex scene',520],['Aubergine tonight 😏',455],['Vibrator product copy',372],['Nude life drawing tips',330],['Talking about consent',245],['Grilled aubergine recipe',120]];
+function sceneDirection(){
+ let s=`<rect x="400" y="40" width="210" height="300" fill="#f6dde6"/>${T('REFUSES',505,62,'tp')}${T('ANSWERS',220,62,'ts')}<line x1="400" y1="40" x2="400" y2="340" stroke="${P}" stroke-dasharray="5 5"/>`;
+ dirReqs.forEach(([n,x],i)=>{const y=96+i*44,px=Math.max(40,Math.min(600,x+st.shift)),r=px>=400;s+=`<line x1="40" y1="${y}" x2="600" y2="${y}" stroke="#ebe5df"/>${st.shift?`<circle cx="${x}" cy="${y}" r="4" fill="none" stroke="#b4a6ac"/>`:''}<circle cx="${px}" cy="${y}" r="8" fill="${r?P:'#9e8f96'}"/>${T(n,px+(px>480?-14:14),y+4,r?'tp':'ts',px>480?'end':'start')}`;});
+ s+=`<path d="M 40 372 H 596" stroke="var(--ink)"/><path d="M 588 367 L 598 372 L 588 377" fill="none" stroke="var(--ink)"/>${T('FURTHER ALONG THE “REFUSAL DIRECTION”',320,392,'ts')}`;
+ return svg(s);
+}
+function liveDirection(){
+ const n=dirReqs.filter(([,x])=>x+st.shift>=400).length;
+ return `${statRow('Requests refused',`${n} / ${dirReqs.length}`)}<p>${st.shift<0?'Pushed away from refusing: even the explicit request gets answered. This is how some people “uncensor” open models.':st.shift>0?'Pushed towards refusing: harmless sex-ed and recipes start getting refused too.':'Left alone, the model refuses the requests past the line.'}</p>`;
+}
+function controlsDirection(){
+ return `${range('shift','Steer the model',st.shift,-200,200,10,v=>v>0?'+'+v:v)}<div id="live">${liveDirection()}</div>${fine('Based on “Refusal in Language Models Is Mediated by a Single Direction” (Arditi et al., 2024), which found this across many open chat models.','The positions here are invented. In a real model, this is one direction in thousands of dimensions.')}`;
+}
+// 8 · output check
+const outImgs=[['A pink flower',.12],['A person on the beach',.38],['A classical statue',.57],['A vibrator product photo',.61],['An explicit image (not drawn)',.86]];
+function drawing(i){
+ const b=(c)=>`<rect width="200" height="200" fill="${c}"/>`;
+ if(i===0)return b('#eee9e2')+`<path d="M100 190 V 95" stroke="#526e56" stroke-width="4"/>`+[0,1,2,3,4,5,6].map(k=>{const a=k/7*Math.PI*2;return `<ellipse cx="${100+Math.cos(a)*22}" cy="${80+Math.sin(a)*22}" rx="16" ry="11" transform="rotate(${a*57.3} ${100+Math.cos(a)*22} ${80+Math.sin(a)*22})" fill="${k%2?'#ed94b6':P}"/>`;}).join('')+`<circle cx="100" cy="80" r="11" fill="#694c3a"/>`;
+ if(i===1)return b('#dbe7ee')+`<circle cx="160" cy="40" r="16" fill="#ecc75e"/><rect y="110" width="200" height="40" fill="#a9c6d6"/><rect y="148" width="200" height="52" fill="#efe0c2"/><circle cx="96" cy="112" r="11" fill="#b07a5a"/><rect x="87" y="124" width="18" height="38" rx="8" fill="#b07a5a"/><rect x="87" y="132" width="18" height="16" rx="4" fill="${P}"/>`;
+ if(i===2)return b('#ece8e2')+`<rect x="65" y="150" width="70" height="40" fill="#d8d2c9"/><path d="M58 150 Q 62 112 100 108 Q 138 112 142 150 Z" fill="#e3ddd3" stroke="#bdb5aa"/><ellipse cx="100" cy="80" rx="20" ry="25" fill="#e3ddd3" stroke="#bdb5aa"/>`;
+ if(i===3)return b('#f3eef0')+`<ellipse cx="100" cy="172" rx="40" ry="7" fill="#00000014"/><rect x="86" y="38" width="28" height="132" rx="14" fill="#c46b9a"/><circle cx="100" cy="120" r="4" fill="#f3eef0"/><circle cx="100" cy="134" r="4" fill="#f3eef0"/>`;
+ return b('#e6e0dd')+`<text x="100" y="104" text-anchor="middle" class="ts">not drawn here</text>`;
+}
+function sceneOutput(){
+ const [name,sim]=outImgs[st.img],blocked=sim>=st.othr;
+ const out=blocked?`<rect width="200" height="200" fill="#111"/><text x="100" y="96" text-anchor="middle" style="font:11px 'DM Mono',monospace;fill:#bbb">potential NSFW</text><text x="100" y="112" text-anchor="middle" style="font:11px 'DM Mono',monospace;fill:#bbb">content detected</text>`:drawing(st.img);
+ return `<div class="visual-stack"><div class="out-row"><div><svg viewBox="0 0 200 200" aria-label="Generated image: ${name}">${drawing(st.img)}</svg><p>GENERATED</p></div><span class="arrow">→</span><div><span class="pill">checker</span></div><span class="arrow">→</span><div><svg viewBox="0 0 200 200" aria-label="${blocked?'Blocked image':'Image shown'}">${out}</svg><p>WHAT YOU SEE</p></div></div><div class="meter" aria-hidden="true"><i style="width:${sim*100}%"></i><u style="left:${st.othr*100}%"></u></div><p class="note">Pink: similarity to banned concepts (${sim.toFixed(2)}) · black line: threshold (${st.othr.toFixed(2)})</p></div>`;
+}
+const liveOutput=()=>statRow('Result',outImgs[st.img][1]>=st.othr?'Blacked out':'Shown');
+function controlsOutput(){
+ return `<span class="label">Generated image</span><div class="prompt-list">${outImgs.map(([t],i)=>`<button data-img="${i}" class="${i===st.img?'active':''}">${t}</button>`).join('')}</div>${range('othr','Block if similarity is at least',st.othr,.1,.95,.01,v=>(+v).toFixed(2))}<div id="live">${liveOutput()}</div>${fine('Stable Diffusion’s original safety checker worked roughly like this: it compared CLIP image embeddings with embeddings of a hidden list of concepts. Researchers found the list covered only sexual content, and that the filter could be bypassed (Rando et al., 2022).','Chatbots run similar checks on written answers, sometimes while the answer is still being written.')}`;
+}
+// 9 · trade-off
+const harmless=[['recipe',.05],['news report',.14],['consent sex-ed',.22],['dating advice',.31],['STI testing',.36],['anatomy sex-ed',.44],['breast health',.49],['queer romance',.52],['queer art',.56],['sex worker safety',.6],['sex-tech product',.64],['lingerie ad',.68],['vibrator review',.72]];
+const explicit=[.47,.63,.74,.81,.86,.9,.95];
+const sx=v=>60+v*520;
+function sceneTradeoff(){
+ const t=st.tthr;let s=`<rect x="${sx(t)}" y="30" width="${580-sx(t)}" height="320" fill="#f6dde6"/>${T('BLOCKED',(sx(t)+580)/2,48,'tp')}<line x1="${sx(t)}" y1="30" x2="${sx(t)}" y2="350" stroke="${P}" stroke-width="2" stroke-dasharray="5 5"/>`;
+ s+=T('HARMLESS',20,214,'ts','start')+T('EXPLICIT',20,314,'ts','start');
+ harmless.forEach(([n,v])=>{const x=sx(v),b=v>=t;s+=`<circle cx="${x}" cy="210" r="8" fill="${b?P:'#9e8f96'}" stroke="var(--paper)" stroke-width="2"><title>${n} · ${v}</title></circle><text x="${x}" y="194" class="${b?'tp':'ts'}" transform="rotate(-45 ${x} 194)">${n}</text>`;});
+ explicit.forEach(v=>{const x=sx(v),b=v>=t;s+=`<rect x="${x-8}" y="302" width="16" height="16" rx="3" fill="${b?'#28282c':'#fff'}" stroke="#28282c"><title>explicit · ${v}</title></rect>`;});
+ s+=`<path d="M 60 372 H 580" stroke="var(--ink)"/>${T('0',60,390,'ts')}${T('1',580,390,'ts')}${T('CLASSIFIER SCORE',320,390,'ts')}`;
+ return svg(s);
+}
+function liveTradeoff(){
+ const t=st.tthr,fp=harmless.filter(h=>h[1]>=t),miss=explicit.filter(v=>v<t).length;
+ return `${statRow('Harmless blocked',`${fp.length} / ${harmless.length}`)}${statRow('Explicit let through',`${miss} / ${explicit.length}`)}<p>${fp.length?`Blocked by mistake: ${fp.map(h=>h[0]).join(', ')}.`:'No harmless content blocked, but look how much explicit content gets through.'}</p>`;
+}
+function controlsTradeoff(){
+ return `${range('tthr','Block if score is at least',st.tthr,.05,.99,.01,v=>(+v).toFixed(2))}<div id="live">${liveTradeoff()}</div>${fine('Made-up scores. The pattern is real, though: content about sex for health, education, art or work often scores close to explicit content.','Circles are harmless content, squares are explicit content. Filled = blocked.')}`;
+}
+const lives={data:liveData,erase:liveErase,direction:liveDirection,output:liveOutput,tradeoff:liveTradeoff};
+const scenes={layers:[sceneLayers,controlsLayers],data:[sceneData,controlsData],erase:[sceneErase,controlsErase],rlhf:[sceneRlhf,controlsRlhf],keywords:[sceneKeywords,controlsKeywords],context:[sceneContext,controlsContext],direction:[sceneDirection,controlsDirection],output:[sceneOutput,controlsOutput],tradeoff:[sceneTradeoff,controlsTradeoff]};
+const type=()=>lessons[Guide.step].type;
+function drawStage(){$('stage').innerHTML=scenes[type()][0]();}
+function draw(){
+ const l=lessons[Guide.step];$('phase').textContent=l.ch?'Each request':'Shaping the model';$('legend').textContent=l.ch?'Happens every time you send something':'Happens before you ever use it';
+ const focused=document.activeElement?.id;drawStage();$('controls').innerHTML=scenes[type()][1]();Guide.bindFine();
+ const on=(id,ev,fn)=>$(id)?.addEventListener(ev,fn);
+ on('req','change',e=>{st.req=+e.target.value;st.sent=false;draw();});
+ on('send','click',()=>{st.sent=true;draw();});
+ // Sliders only refresh the picture and the numbers below them, so dragging isn't interrupted.
+ [['thr',v=>v.toFixed(2)],['erase',v=>v+'%'],['shift',v=>v>0?'+'+v:v],['othr',v=>v.toFixed(2)],['tthr',v=>v.toFixed(2)]].forEach(([id,fmt])=>on(id,'input',e=>{st[id]=+e.target.value;$(id+'Out').textContent=fmt(st[id]);drawStage();$('live').innerHTML=lives[type()]();}));
+ on('round','click',()=>{st.rounds=st.rounds<6?st.rounds+1:0;draw();});
+ document.querySelectorAll('[data-kw]').forEach(b=>b.onclick=()=>{st.kw=+b.dataset.kw;draw();});
+ on('custom','input',e=>{st.custom=e.target.value;st.kw=-1;drawStage();document.querySelectorAll('[data-kw]').forEach(b=>b.classList.remove('active'));});
+ on('custom','focus',()=>{if(st.kw>=0){st.kw=-1;drawStage();document.querySelectorAll('[data-kw]').forEach(b=>b.classList.remove('active'));}});
+ document.querySelectorAll('[data-ctx]').forEach(b=>b.onclick=()=>{const w=b.dataset.ctx;st.ctx=st.ctx.includes(w)?st.ctx.filter(x=>x!==w):[...st.ctx,w];draw();});
+ document.querySelectorAll('[data-img]').forEach(b=>b.onclick=()=>{st.img=+b.dataset.img;draw();});
+ if(focused&&$(focused)&&focused!=='custom')$(focused).focus({preventScroll:true});
+}
+Guide.init({chapters:['Shaping the model','Each request'],lessons,draw});
+</script></body></html>

@@ -13,3 +13,6 @@ desktop.ini
 *.tmp
 *.swp
 *~
+
+# Local-only product thumbnails for the map guide (not ours to publish)
+map-photos/
