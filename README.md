@@ -6,7 +6,7 @@ ml4sx is a growing collection of guides and experiments for people curious about
 
 I'm not an expert — just a hobbyist who enjoys experimenting with sex tech and is happy to share what I'm learning along the way. These resources are my way of making sense of how machine learning works, through interactive explanations, small experiments, and questions that come up as I explore. I'm learning too, so corrections, questions, and other perspectives are very welcome.
 
-Inspired by [ml4a — Machine Learning for Artists](https://ml4a.github.io/), this project starts with a similar spirit: learn by exploring, changing things, and making. ml4sx is an independent project, with no affiliation to ml4a.
+Inspired by [ml4a — Machine Learning for Artists](https://ml4a.github.io/), by Gene Kogan and collaborators, this independent project shares a spirit of learning by exploring, changing things, and making.
 
 ## Start exploring
 
@@ -53,12 +53,6 @@ These are directions to explore, not resources already available in the reposito
 You do not need to be an expert to contribute either. Questions, experiences from your work, suggestions, corrections, accessibility improvements, and new learning experiments are welcome. Open an issue to propose an idea or discuss a substantial addition; use a pull request for a focused change.
 
 For a new resource, explain what someone will learn, how to run it, and what prior knowledge it assumes. Distinguish teaching simulations from actual model behavior, acknowledge sources, and make any dependencies or external services clear.
-
-## Inspiration and references
-
-[ml4a](https://ml4a.github.io/), created by Gene Kogan and collaborators, is a collection of educational resources about machine learning for artists. Its combination of explanations, guides, and interactive demonstrations is an inspiration for this project. The linked site is an archive and points to [ml4a.net](https://ml4a.net/) as its newer home.
-
-Research papers and further reading for each topic are linked inside the individual guides.
 
 ## License
 
