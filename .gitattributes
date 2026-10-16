@@ -1,0 +1,6 @@
+# Normalize text across operating systems.
+* text=auto
+*.md text eol=lf
+*.html text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
