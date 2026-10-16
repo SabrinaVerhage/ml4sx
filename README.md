@@ -2,58 +2,39 @@
 
 **Machine learning for sex-tech enthusiasts, sex workers, and anyone in the sex-tech industry.**
 
-ml4sx is a growing collection of guides and experiments for people curious about machine learning in the context of sex tech: technologies concerned with sexuality, intimacy, pleasure, and human connection. Whether you are a sex worker, a hobbyist, someone working in the sex-tech industry, or simply curious, you are welcome here. You do not need a technical background to start exploring.
+Hi! I'm a maker who likes experimenting with sex tech, giving workshops, and sharing tech knowledge. I'm not a machine learning expert — just a hobbyist figuring things out and happy to share what I learn.
 
-I'm not an expert — just a hobbyist who enjoys experimenting with sex tech and is happy to share what I'm learning along the way. These resources are my way of making sense of how machine learning works, through interactive explanations, small experiments, and questions that come up as I explore. I'm learning too, so corrections, questions, and other perspectives are very welcome.
+This is where I'm collecting little guides and experiments about machine learning and how it connects to sex tech. If you're curious too, have a look around. You don't need a technical background to get started.
 
-Inspired by [ml4a — Machine Learning for Artists](https://ml4a.github.io/), by Gene Kogan and collaborators, this independent project shares a spirit of learning by exploring, changing things, and making.
+Inspired by [ml4a — Machine Learning for Artists](https://ml4a.github.io/), by Gene Kogan and collaborators.
 
-## Start exploring
+## What's here so far?
 
-The first two guides introduce the foundations of language and image models. They use general examples to build understanding that future sex-tech experiments can draw on; they are not yet tutorials for building sex-tech applications.
+Two interactive guides to get started:
 
-| Guide | What you will explore |
-| --- | --- |
-| [Inside the next word](./Inside-the-next-word.html) | How language models learn and generate text: tokens, representations, transformer blocks, next-token prediction, and an interactive attention playground. |
-| [Inside the emerging image](./Inside-the-emerging-image.html) | How text can guide image generation: image–caption pairs, latent representations, diffusion training, noise, seeds, attention, and image-to-image generation. |
+- [Inside the next word](./Inside-the-next-word.html) — how language models turn text into tokens, use attention, and choose what comes next.
+- [Inside the emerging image](./Inside-the-emerging-image.html) — how image models learn, and how prompts, noise, and a few other ingredients lead to an image.
 
-Both guides are standalone HTML pages with interactive diagrams and controls. They use simplified, authored examples rather than running trained models. Each guide includes notes explaining its simplifications and links for further reading.
+These start with general examples. The idea is to get a feel for the basics, then use that understanding to play around with sex-tech projects.
 
-### Open a guide
+You can click through the steps, move sliders, and see what changes. They're simplified demos, not actual AI models running in your browser. There are notes and links inside each guide if you want to dig further.
 
-1. Clone this repository, or choose **Code → Download ZIP** on GitHub and extract it.
-2. Open `Inside-the-next-word.html` or `Inside-the-emerging-image.html` in a modern web browser.
-3. Follow the steps, try the controls, and read the notes and sources.
+## Try them
 
-There is no installation, build step, account, API key, or GPU required. GitHub's file view shows the HTML source; download the files to use the interactive guides.
+1. Download this repo using **Code → Download ZIP** and unzip it, or clone it if you use Git.
+2. Open either HTML file in your browser.
+3. Click around!
 
-The demonstrations run locally in your browser and do not send prompts to an AI service. The language-model guide requests optional web fonts from Google Fonts when online; its teaching content and interactions also work without those fonts.
+No setup or API key needed. On GitHub you'll see the code, so download the files to use the guides.
 
-## Why sex tech?
+The demos run locally and don't send prompts to an AI service. The language-model guide loads Google Fonts when you're online, but works without them too.
 
-My interest in sex tech gives me a starting point for exploring both technical and human questions about machine learning. How does a conversational system produce a response that feels personal? How do training data shape representations of bodies and desire? What can a model infer from an input, and what are we merely assuming it understands?
+## More to come, probably :)
 
-Learning the mechanisms gives us a better basis for experimentation and critique. Consent, privacy, agency, and the diversity of bodies and experiences belong in that learning process from the beginning.
+I'll add things as I make them or use them in workshops. No big roadmap — just a place to collect and share useful stuff.
 
-## Where this is going
-
-This repository is at an early stage. The two interactive guides are the starting point. I plan to add more as I learn, try things out, and hear what others would find useful.
-
-Possible next steps include:
-
-- Guided experiments connecting ML foundations to sex-tech design questions.
-- Small, reproducible examples with clear explanations of their inputs, outputs, and limitations.
-- Workshop materials that pair technical exploration with discussion of intimacy, representation, and agency.
-- Further explorations of data, bias, personalization, and model behavior.
-
-These are directions to explore, not resources already available in the repository.
-
-## Contributing
-
-You do not need to be an expert to contribute either. Questions, experiences from your work, suggestions, corrections, accessibility improvements, and new learning experiments are welcome. Open an issue to propose an idea or discuss a substantial addition; use a pull request for a focused change.
-
-For a new resource, explain what someone will learn, how to run it, and what prior knowledge it assumes. Distinguish teaching simulations from actual model behavior, acknowledge sources, and make any dependencies or external services clear.
+Found something confusing or wrong? Have an idea for an experiment? Open an issue or send a pull request. I'm learning too, and help is welcome.
 
 ## License
 
-A project license has not been selected yet.
+I haven't picked a license yet.
