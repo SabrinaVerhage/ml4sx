@@ -4,7 +4,9 @@
 
 Hi! I'm a maker who likes experimenting with sex tech, giving workshops, and sharing tech knowledge. I'm not a machine learning expert — just a hobbyist figuring things out and happy to share what I learn.
 
-This is where I'm collecting little guides and experiments about machine learning and how it connects to sex tech. If you're curious too, have a look around. You don't need a technical background to get started.
+I made this repo for my **Prompt Denied** workshop. I also gave a workshop called **Artificial Desire** at **PFFV in 2026**.
+
+Here I'm collecting little guides and experiments about machine learning and how it connects to sex tech. If you're curious too, have a look around. You don't need a technical background to get started.
 
 Inspired by [ml4a — Machine Learning for Artists](https://ml4a.github.io/), by Gene Kogan and collaborators.
 
